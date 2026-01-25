@@ -216,6 +216,7 @@
       });
 
       class State {
+        static music = new Audio('Tic Tac Flow.mp3');
         static currPlayer = Players.player1;
         static players = {
           1: {
@@ -335,10 +336,21 @@
         --State.turnsLeft;
       };
 
+      const addBgSong = () => {
+        State.music.loop = true;
+
+        State.music.play();
+      };
+
+      const stopBgSong = () => {
+        State.music.pause();
+      };
+
       const startGame = () => {
         const tbody = document.querySelector('tbody');
 
         tbody.addEventListener('click', startTurn);
+        tbody.addEventListener('click', addBgSong, { once: true });
       };
 
       const endGame = (gameAreaEl) => {
@@ -351,6 +363,7 @@
         winnerEl.textContent = State.winner ? `Jogador ${State.winner} venceu!` : 'EMPATE!';
         playAgainBtn.setAttribute('style', 'display: block');
         playAgainBtn.addEventListener('click', () => window.location.reload());
+        stopBgSong();
       };
 
       document.addEventListener('DOMContentLoaded', startGame);
