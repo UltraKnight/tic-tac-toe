@@ -10,8 +10,8 @@
         --bg: #2e2e3a;
         --text-primary: #ffc857;
         --text-secondary: #fb8500;
-        --blue-border: rgb(22, 22, 122);
-        --light-blue-border: rgb(0, 70, 183);
+        --blue-border: rgb(77, 157, 255);
+        --light-blue-border: rgb(0, 195, 255);
         --success: #2ec4b6;
       }
 
@@ -38,6 +38,8 @@
       table {
         border-collapse: collapse;
         margin-bottom: 10px;
+        width: 320px;
+        height: 320px;
 
         tbody {
           :hover {
@@ -90,37 +92,39 @@
 
         &.first-column {
           height: 100%;
-          left: 43px;
+          left: 50px;
+          top: -5px;
         }
 
         &.second-column {
           height: 100%;
           left: 50%;
+          top: -5px;
         }
 
         &.third-column {
           height: 100%;
-          left: 220px;
+          left: 270px;
+          top: -5px;
         }
 
         &.first-row {
           height: 100%;
           rotate: -90deg;
-          top: 36px;
+          top: 45px;
         }
 
         &.second-row {
           height: 100%;
           rotate: -90deg;
-          top: 50%;
+          top: calc(-10px + 50%);
         }
 
         &.third-row {
-          transform-origin: bottom;
           height: 100%;
-          left: -5px;
+          left: 100%;
           rotate: 90deg;
-          top: -36px;
+          top: 275px;
         }
 
         &.main-diagonal {
