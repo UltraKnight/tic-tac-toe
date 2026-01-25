@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic Tac Toe</title>
+    <style>
+      :root {
+        --bg: #2e2e3a;
+        --text-primary: #ffc857;
+        --text-secondary: #fb8500;
+        --blue-border: rgb(22, 22, 122);
+        --light-blue-border: rgb(0, 70, 183);
+        --success: #2ec4b6;
+      }
+
+      html {
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        background-color: var(--bg);
+        margin: 10px;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .game-area {
+        position: relative;
+      }
+
+      table {
+        border-collapse: collapse;
+        margin-bottom: 10px;
+
+        tbody {
+          :hover {
+            cursor: pointer;
+          }
+
+          tr:nth-of-type(2) > td {
+            border-block: 8px solid var(--blue-border);
+          }
+
+          tr {
+            :nth-child(2) {
+              border-inline: 8px solid var(--blue-border);
+            }
+          }
+
+          tr > td {
+            width: 5rem;
+            height: 5rem;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 4rem;
+            font-weight: 800;
+            animation-name: color;
+            animation-duration: 1s;
+            animation-direction: alternate;
+            animation-iteration-count: infinite;
+
+            &.primary {
+              color: var(--text-primary);
+            }
+
+            &.secondary {
+              color: var(--text-secondary);
+            }
+          }
+        }
+      }
+
+      .winner-marker {
+        position: absolute;
+        width: 10px;
+        height: 0;
+        background-color: var(--success);
+        transform: translate(-50%);
+        transition: height 1s ease-out;
+        transform-origin: top;
+        top: 0;
+        left: -5px;
+
+        &.first-column {
+          height: 100%;
+          left: 43px;
+        }
+
+        &.second-column {
+          height: 100%;
+          left: 50%;
+        }
+
+        &.third-column {
+          height: 100%;
+          left: 220px;
+        }
+
+        &.first-row {
+          height: 100%;
+          rotate: -90deg;
+          top: 36px;
+        }
+
+        &.second-row {
+          height: 100%;
+          rotate: -90deg;
+          top: 50%;
+        }
+
+        &.third-row {
+          transform-origin: bottom;
+          height: 100%;
+          left: -5px;
+          rotate: 90deg;
+          top: -36px;
+        }
+
+        &.main-diagonal {
+          rotate: -45deg;
+          height: 140%;
+        }
+
+        &.secondary-diagonal {
+          transform-origin: bottom;
+          bottom: 0;
+          top: unset;
+          rotate: 45deg;
+          height: 140%;
+        }
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+      }
+
+      h1 {
+        color: var(--text-primary);
+      }
+
+      h2 {
+        color: var(--success);
+      }
+
+      .p1-label {
+        color: var(--text-primary);
+      }
+
+      .p2-label {
+        color: var(--text-secondary);
+      }
+
+      button {
+        display: none;
+        background-color: var(--bg);
+        color: var(--text-primary);
+        border: 1px solid var(--success);
+        border-radius: 25px;
+        font-size: 1.2rem;
+        padding: 0.5rem;
+        margin-bottom: 10px;
+
+        &:hover {
+          color: var(--bg);
+          background-color: var(--text-primary);
+        }
+      }
+
+      .gameover {
+        display: none;
+      }
+
+      @keyframes color {
+        from {
+          border-color: var(--blue-border);
+        }
+
+        to {
+          border-color: var(--light-blue-border);
+        }
+      }
+    </style>
+    <script type="text/javascript">
+      'serviceWorker' in navigator && navigator.serviceWorker.register('service-worker.js');
+      const Players = Object.freeze({
+        player1: '1',
+        player2: '2',
+      });
+
+      const WinPositions = Object.freeze({
+        Rows: {
+          0: 'first-row',
+          1: 'second-row',
+          3: 'third-row',
+        },
+        Cols: {
+          0: 'first-column',
+          1: 'second-column',
+          3: 'third-column',
+        },
+        MainDiagonal: 'main-diagonal',
+        SecondaryDiagonal: 'secondary-diagonal',
+      });
+
+      class State {
+        static currPlayer = Players.player1;
+        static players = {
+          1: {
+            symbol: 'X',
+          },
+          2: {
+            symbol: 'O',
+          },
+        };
+        static currentGame = Array(3)
+          .fill(null)
+          .map(() => Array(3).fill(null));
+        static turnsLeft = 9;
+        static winner = null;
+      }
+
+      const setWinner = (playerNumber) => {
+        State.winner = playerNumber;
+      };
+
+      const hasWinner = () => {
+        let winner = null;
+        let winPosition = null;
+        const { currentGame } = State;
+        const players = Object.keys(State.players);
+        const checkRow = (r, value) => currentGame[r].every((field) => field === value);
+        const checkCol = (c, value) => currentGame.every((row, i) => row[c] === value);
+
+        const checkRows = () => {
+          players.forEach((p) => {
+            for (i = 0; i < currentGame.length; i++) {
+              const isWinner = checkRow(i, p);
+              if (isWinner) {
+                winPosition = WinPositions.Rows[i];
+                winner = p;
+              }
+            }
+          });
+        };
+        const checkColumns = () => {
+          players.forEach((p) => {
+            for (col = 0; col < currentGame[0].length; col++) {
+              const isWinner = checkCol(col, p);
+              if (isWinner) {
+                winPosition = WinPositions.Cols[col];
+                winner = p;
+              }
+            }
+          });
+        };
+        const checkMainDiagonal = () => {
+          players.forEach((p) => {
+            const isWinner = currentGame.every((row, i) => row[i] === p);
+            if (isWinner) {
+              winPosition = WinPositions.MainDiagonal;
+              winner = p;
+            }
+          });
+        };
+
+        const checkSecondaryDiagonal = () => {
+          const n = currentGame.length;
+          // n - 1 = last column
+          players.forEach((p) => {
+            const isWinner = currentGame.every((row, i) => row[n - 1 - i] === p);
+            if (isWinner) {
+              winPosition = WinPositions.SecondaryDiagonal;
+              winner = p;
+            }
+          });
+        };
+
+        const setWinnerMarkerClass = (classToAdd) => {
+          const winnerMarkerEl = document.querySelector('.winner-marker');
+          winnerMarkerEl.classList.add(classToAdd);
+        };
+
+        checkRows();
+        // stop validations once a winner is determined
+        !winner && checkColumns();
+        !winner && checkMainDiagonal();
+        !winner && checkSecondaryDiagonal();
+        winPosition && setWinnerMarkerClass(winPosition);
+
+        return winner;
+      };
+
+      const startTurn = (e) => {
+        let isValidBoard = true;
+        const tbody = e.target.closest('tbody');
+        const td = e.target.closest('td');
+        const playerSelection = td.classList[0].split('-');
+
+        if (!td || !tbody.contains(td)) return;
+
+        if (td.textContent) return;
+
+        State.currentGame[playerSelection[0] - 1][playerSelection[1] - 1] = State.currPlayer;
+
+        const { currPlayer } = State;
+
+        td.classList.toggle(currPlayer === Players.player1 ? 'primary' : 'secondary');
+        td.textContent = State.players[currPlayer].symbol;
+
+        endTurn();
+        setWinner(hasWinner());
+
+        if (State.turnsLeft === 0 || State.winner) {
+          endGame(tbody);
+        }
+      };
+
+      const endTurn = () => {
+        State.currPlayer === Players.player1
+          ? (State.currPlayer = Players.player2)
+          : (State.currPlayer = Players.player1);
+        --State.turnsLeft;
+      };
+
+      const startGame = () => {
+        const tbody = document.querySelector('tbody');
+
+        tbody.addEventListener('click', startTurn);
+      };
+
+      const endGame = (gameAreaEl) => {
+        const gameOverEl = document.querySelector('.gameover');
+        const winnerEl = gameOverEl.lastElementChild;
+        const playAgainBtn = document.querySelector('button');
+
+        gameAreaEl.removeEventListener('click', startTurn);
+        gameOverEl.classList.toggle('gameover');
+        winnerEl.textContent = State.winner ? `Jogador ${State.winner} venceu!` : 'EMPATE!';
+        playAgainBtn.setAttribute('style', 'display: block');
+        playAgainBtn.addEventListener('click', () => window.location.reload());
+      };
+
+      document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+  </head>
+  <body>
+    <button>Jogar Novamente</button>
+    <div class="game-area">
+      <table>
+        <tbody>
+          <tr>
+            <td class="1-1"></td>
+            <td class="1-2"></td>
+            <td class="1-3"></td>
+          </tr>
+          <tr>
+            <td class="2-1"></td>
+            <td class="2-2"></td>
+            <td class="2-3"></td>
+          </tr>
+          <tr>
+            <td class="3-1"></td>
+            <td class="3-2"></td>
+            <td class="3-3"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="winner-marker"></div>
+    </div>
+    <div class="gameover">
+      <h1>Fim de Jogo!</h1>
+      <h2 class="winner"></h2>
+    </div>
+    <h3 class="p1-label">Player 1: X</h3>
+    <h3 class="p2-label">Player 2: O</h3>
+  </body>
+</html>
