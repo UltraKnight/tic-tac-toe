@@ -193,12 +193,12 @@
         }
       }
     </style>
-    <script type="text/javascript">
+    <script type="module">
       'serviceWorker' in navigator && navigator.serviceWorker.register('service-worker.js');
-      const Players = Object.freeze({
-        player1: '1',
-        player2: '2',
-      });
+
+      import { globalState, Players } from './state.js';
+
+      const state = globalState;
 
       const WinPositions = Object.freeze({
         Rows: {
@@ -215,39 +215,19 @@
         SecondaryDiagonal: 'secondary-diagonal',
       });
 
-      class State {
-        static music = new Audio('Tic Tac Flow.mp3');
-        static currPlayer = Players.player1;
-        static players = {
-          1: {
-            symbol: 'X',
-          },
-          2: {
-            symbol: 'O',
-          },
-        };
-        static currentGame = Array(3)
-          .fill(null)
-          .map(() => Array(3).fill(null));
-        static turnsLeft = 9;
-        static winner = null;
-      }
-
-      const setWinner = (playerNumber) => {
-        State.winner = playerNumber;
-      };
+      
 
       const hasWinner = () => {
         let winner = null;
         let winPosition = null;
-        const { currentGame } = State;
-        const players = Object.keys(State.players);
+        const currentGame = state.getCurrentGame();
+        const players = Object.keys(state.getPlayers());
         const checkRow = (r, value) => currentGame[r].every((field) => field === value);
         const checkCol = (c, value) => currentGame.every((row, i) => row[c] === value);
 
         const checkRows = () => {
           players.forEach((p) => {
-            for (i = 0; i < currentGame.length; i++) {
+            for (let i = 0; i < currentGame.length; i++) {
               const isWinner = checkRow(i, p);
               if (isWinner) {
                 winPosition = WinPositions.Rows[i];
@@ -258,7 +238,7 @@
         };
         const checkColumns = () => {
           players.forEach((p) => {
-            for (col = 0; col < currentGame[0].length; col++) {
+            for (let col = 0; col < currentGame[0].length; col++) {
               const isWinner = checkCol(col, p);
               if (isWinner) {
                 winPosition = WinPositions.Cols[col];
@@ -305,7 +285,6 @@
       };
 
       const startTurn = (e) => {
-        let isValidBoard = true;
         const tbody = e.target.closest('tbody');
         const td = e.target.closest('td');
         const playerSelection = td.classList[0].split('-');
@@ -314,36 +293,38 @@
 
         if (td.textContent) return;
 
-        State.currentGame[playerSelection[0] - 1][playerSelection[1] - 1] = State.currPlayer;
+        state.updateCurrentGameByIndexes(playerSelection[0] - 1, playerSelection[1] - 1);
 
-        const { currPlayer } = State;
+        const currPlayer = state.getCurrPlayer();
 
         td.classList.toggle(currPlayer === Players.player1 ? 'primary' : 'secondary');
-        td.textContent = State.players[currPlayer].symbol;
+        td.textContent = state.getPlayerSymbol(currPlayer);
 
         endTurn();
-        setWinner(hasWinner());
+        state.setWinner(hasWinner());
 
-        if (State.turnsLeft === 0 || State.winner) {
+        if (state.getTurnsLeft() === 0 || state.getWinner()) {
           endGame(tbody);
         }
       };
 
       const endTurn = () => {
-        State.currPlayer === Players.player1
-          ? (State.currPlayer = Players.player2)
-          : (State.currPlayer = Players.player1);
-        --State.turnsLeft;
+        state.getCurrPlayer() === Players.player1
+          ? state.setCurrPlayer(Players.player2)
+          : state.setCurrPlayer(Players.player1);
+        state.deductTurn();
       };
 
       const addBgSong = () => {
-        State.music.loop = true;
+        const music = state.getMusic();
+        music.loop = true;
 
-        State.music.play();
+        music.play();
       };
 
       const stopBgSong = () => {
-        State.music.pause();
+        const music = state.getMusic();
+        music.pause();
       };
 
       const startGame = () => {
@@ -357,10 +338,11 @@
         const gameOverEl = document.querySelector('.gameover');
         const winnerEl = gameOverEl.lastElementChild;
         const playAgainBtn = document.querySelector('button');
+        const winner = state.getWinner();
 
         gameAreaEl.removeEventListener('click', startTurn);
         gameOverEl.classList.toggle('gameover');
-        winnerEl.textContent = State.winner ? `Jogador ${State.winner} venceu!` : 'EMPATE!';
+        winnerEl.textContent = winner ? `Jogador ${winner} venceu!` : 'EMPATE!';
         playAgainBtn.setAttribute('style', 'display: block');
         playAgainBtn.addEventListener('click', () => window.location.reload());
         stopBgSong();
