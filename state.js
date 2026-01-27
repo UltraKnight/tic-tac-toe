@@ -30,6 +30,8 @@ class State {
     
   getMusic = (id) => this._musics[id];
 
+  getAllMusics = () => this._musics;
+
   getPlayers = () => this._players;
 
   getPlayerSymbol = (playerNumber) => this._players[playerNumber].symbol;
