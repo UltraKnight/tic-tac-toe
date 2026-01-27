@@ -4,7 +4,10 @@ export const Players = Object.freeze({
 });
 
 class State {
-  _music = new Audio('Tic Tac Flow.mp3');
+  _musics = {
+    bg: new Audio('Tic Tac Flow.mp3'),
+    gameOver: new Audio('Game Over.mp3')
+  };
   _currPlayer = Players.player1;
   _players = {
     1: {
@@ -25,7 +28,7 @@ class State {
     this._winner = playerNumber;
   };
     
-  getMusic = () => this._music;
+  getMusic = (id) => this._musics[id];
 
   getPlayers = () => this._players;
 

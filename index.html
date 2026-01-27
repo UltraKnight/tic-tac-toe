@@ -15,6 +15,20 @@
         --success: #2ec4b6;
       }
 
+      @keyframes pop {
+        0% {
+          transform: scale(0.6);
+          opacity: 0;
+        }
+        80% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
       html {
         font-size: 16px;
         box-sizing: border-box;
@@ -23,7 +37,8 @@
       body {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         background-color: var(--bg);
-        margin: 10px;
+        height: 100dvh ;
+        margin: 0;
         padding: 0;
         display: flex;
         flex-direction: column;
@@ -37,7 +52,7 @@
 
       table {
         border-collapse: collapse;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
         width: 320px;
         height: 320px;
 
@@ -74,6 +89,10 @@
 
             &.secondary {
               color: var(--text-secondary);
+            }
+
+            &.animate {
+              animation: pop 0.25s ease-out;
             }
           }
         }
@@ -298,6 +317,7 @@
         const currPlayer = state.getCurrPlayer();
 
         td.classList.toggle(currPlayer === Players.player1 ? 'primary' : 'secondary');
+        td.classList.add('animate');
         td.textContent = state.getPlayerSymbol(currPlayer);
 
         endTurn();
@@ -315,15 +335,20 @@
         state.deductTurn();
       };
 
-      const addBgSong = () => {
-        const music = state.getMusic();
+      const playBgSong = () => {
+        const music = state.getMusic('bg');
         music.loop = true;
 
         music.play();
       };
 
+      const playGameOverSong = () => {
+        const music = state.getMusic('gameOver');
+        music.play();
+      };
+
       const stopBgSong = () => {
-        const music = state.getMusic();
+        const music = state.getMusic('bg');
         music.pause();
       };
 
@@ -331,7 +356,7 @@
         const tbody = document.querySelector('tbody');
 
         tbody.addEventListener('click', startTurn);
-        tbody.addEventListener('click', addBgSong, { once: true });
+        tbody.addEventListener('click', playBgSong, { once: true });
       };
 
       const endGame = (gameAreaEl) => {
@@ -346,6 +371,7 @@
         playAgainBtn.setAttribute('style', 'display: block');
         playAgainBtn.addEventListener('click', () => window.location.reload());
         stopBgSong();
+        playGameOverSong();
       };
 
       document.addEventListener('DOMContentLoaded', startGame);
