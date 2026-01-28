@@ -6,7 +6,8 @@ export const Players = Object.freeze({
 class State {
   _musics = {
     bg: new Audio('Tic Tac Flow.mp3'),
-    gameOver: new Audio('Game Over.mp3')
+    gameOver: new Audio('Game Over.mp3'),
+    explosion: new Audio('Explosion.mp3'),
   };
   _currPlayer = Players.player1;
   _players = {
@@ -17,9 +18,22 @@ class State {
       symbol: 'O',
     },
   };
-  _currentGame = new Array(3)
-    .fill(null)
-    .map(() => new Array(3).fill(null));
+  _powers = {
+    bomb: {
+      active: true,
+      action() {
+        const lineToRemove = Math.floor(Math.random() * this._currentGame.length);
+        const affectedOccuppied = this._currentGame[lineToRemove]
+          .map((value, col) => (value ? { row: lineToRemove, col } : null))
+          .filter((pos) => pos !== null);
+        this._currentGame[lineToRemove] = new Array(3).fill(null);
+        this._turnsLeft += affectedOccuppied.length; // adjust turns left
+        const affectedPositions = this._currentGame[lineToRemove].map((_, col) => ({ row: lineToRemove, col }));
+        return { affectedPositions }; //  [{row, col}, ...]
+      },
+    },
+  };
+  _currentGame = new Array(3).fill(null).map(() => new Array(3).fill(null));
   _turnsLeft = 9;
   _winner = null;
 
@@ -27,7 +41,7 @@ class State {
   setWinner = (playerNumber) => {
     this._winner = playerNumber;
   };
-    
+
   getMusic = (id) => this._musics[id];
 
   getAllMusics = () => this._musics;
@@ -38,12 +52,21 @@ class State {
 
   updateCurrentGameByIndexes = (index1, index2) => {
     this._currentGame[index1][index2] = this._currPlayer;
-  }
+  };
+
+  usePower = (powerId) => {
+    if (this._powers[powerId]?.active) {
+      this._powers[powerId].active = false;
+      const affectedPositions = this._powers[powerId].action.call(this);
+      return { isActive: true, ...affectedPositions };
+    }
+    return { isActive: false, affectedPositions: [] };
+  };
 
   getTurnsLeft = () => this._turnsLeft;
   deductTurn = () => {
     this._turnsLeft -= 1;
-  }
+  };
 
   getCurrentGame = () => this._currentGame;
 
@@ -51,7 +74,7 @@ class State {
 
   setCurrPlayer = (player) => {
     this._currPlayer = player;
-  }
+  };
 }
 
 export const globalState = new State();

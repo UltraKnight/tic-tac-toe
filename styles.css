@@ -7,20 +7,6 @@
   --success: #2ec4b6;
 }
 
-@keyframes pop {
-  0% {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
 html {
   font-size: 16px;
   box-sizing: border-box;
@@ -71,8 +57,8 @@ table {
     }
 
     tr > td {
-      width: 5rem;
-      height: 5rem;
+      width: 6rem;
+      height: 6rem;
       text-align: center;
       vertical-align: middle;
       font-size: 4rem;
@@ -91,10 +77,18 @@ table {
       }
 
       &.animate {
-        animation: pop 0.25s ease-out;
+        animation: pop 0.5s ease-out;
+      }
+
+      &.explode {
+        animation: explode 1s ease-out;
       }
     }
   }
+}
+
+.winner {
+  text-align: center;
 }
 
 .winner-marker {
@@ -201,6 +195,34 @@ button {
   display: none;
 }
 
+.powers {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.powers-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 5px;
+
+  img {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.3s ease-in-out;
+
+    &.active {
+      opacity: 1;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
 @keyframes color {
   from {
     border-color: var(--blue-border);
@@ -208,5 +230,30 @@ button {
 
   to {
     border-color: var(--light-blue-border);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
   }
 }

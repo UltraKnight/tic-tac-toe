@@ -4,6 +4,11 @@
 // @author       Vanderlei Martins
 import { globalState, Players } from './state.js';
 const state = globalState;
+const GAME_AREA_EL = document.querySelector('tbody');
+const GAME_POWERS_EL = document.querySelector('.powers-row');
+const SETUP = {
+  bgSoundVolume: 0.8,
+};
 
 const WIN_POSITIONS = Object.freeze({
   Rows: {
@@ -88,28 +93,51 @@ const hasWinner = () => {
   return winner;
 };
 
-const startTurn = (e) => {
-  const tbody = e.target.closest('tbody');
+const updateBoardAtPosition = (index1, index2, player = null) => {
+  const cell = document.querySelector(`.pos-${index1}-${index2}`);
+  cell.textContent = player ? state.getPlayerSymbol(player) : '🔥';
+  player
+    ? cell.classList.toggle(player === Players.player1 ? 'primary' : 'secondary')
+    : cell.classList.remove('primary', 'secondary');
+
+  cell.addEventListener(
+    'animationend',
+    () => {
+      if (!player) cell.textContent = '';
+    },
+    { once: true },
+  );
+
+  if (player) {
+    cell.classList.add('animate');
+    cell.classList.remove('explode');
+  } else {
+    cell.classList.remove('animate');
+    cell.classList.add('explode');
+  }
+};
+
+const startTurn = (e, onWin) => {
+  const tbody = document.querySelector('tbody');
   const td = e.target.closest('td');
-  const playerSelection = td.classList[0].split('-');
+  const playerSelection = td.classList[0].split('-').slice(1);
 
   if (!td || !tbody.contains(td)) return;
 
   if (td.textContent) return;
+  const posX = playerSelection[0];
+  const posY = playerSelection[1];
 
-  state.updateCurrentGameByIndexes(playerSelection[0] - 1, playerSelection[1] - 1);
+  state.updateCurrentGameByIndexes(posX - 1, posY - 1);
 
   const currPlayer = state.getCurrPlayer();
-
-  td.classList.toggle(currPlayer === Players.player1 ? 'primary' : 'secondary');
-  td.classList.add('animate');
-  td.textContent = state.getPlayerSymbol(currPlayer);
+  updateBoardAtPosition(posX, posY, currPlayer);
 
   endTurn();
   state.setWinner(hasWinner());
 
   if (state.getTurnsLeft() === 0 || state.getWinner()) {
-    endGame(tbody);
+    endGame(onWin);
   }
 };
 
@@ -120,16 +148,55 @@ const endTurn = () => {
   state.deductTurn();
 };
 
-const play = (audio) => {
+const useBomb = (el) => {
+  const { isActive, affectedPositions } = state.usePower(el.name);
+  if (isActive) {
+    const explosionSfx = state.getMusic('explosion');
+    el.classList.toggle('active');
+    play(explosionSfx, 1);
+    affectedPositions.forEach(({ row, col }) => {
+      updateBoardAtPosition(row + 1, col + 1);
+    });
+  }
+};
+
+const usePower = (e) => {
+  if (state.getTurnsLeft() === 9) return;
+  const powerEl = e.target.closest('img');
+
+  switch (powerEl?.name) {
+    case 'bomb':
+      useBomb(powerEl);
+      break;
+    default:
+      break;
+  }
+};
+
+const handleStartTurn = (e) => startTurn(e, removeGameListeners);
+
+const addGameListeners = () => {
+  const playBgSong = () => {
+    play(state.getMusic('bg', SETUP.bgSoundVolume));
+  };
+
+  GAME_AREA_EL.addEventListener('click', handleStartTurn);
+  GAME_POWERS_EL.addEventListener('click', usePower);
+  GAME_AREA_EL.addEventListener('click', playBgSong, { once: true });
+};
+
+const removeGameListeners = () => {
+  GAME_AREA_EL.removeEventListener('click', handleStartTurn);
+  GAME_POWERS_EL.removeEventListener('click', usePower);
+};
+
+const play = (audio, volume = 1) => {
+  audio.volume = volume;
   audio.paused && audio.play();
 };
 
 const pause = (audio) => {
   !audio.paused && audio.pause();
-};
-
-const playBgSong = () => {
-  play(state.getMusic('bg'));
 };
 
 const playGameOverSong = () => {
@@ -140,26 +207,24 @@ const stopBgSong = () => {
   pause(state.getMusic('bg'));
 };
 
-const startGame = () => {
-  const tbody = document.querySelector('tbody');
-
-  tbody.addEventListener('click', startTurn);
-  tbody.addEventListener('click', playBgSong, { once: true });
+const startGame = (init) => {
+  init();
 };
 
-const endGame = (gameAreaEl) => {
+const endGame = (cb) => {
   const gameOverEl = document.querySelector('.gameover');
   const winnerEl = gameOverEl.lastElementChild;
   const playAgainBtn = document.querySelector('button');
   const winner = state.getWinner();
 
-  gameAreaEl.removeEventListener('click', startTurn);
   gameOverEl.classList.toggle('gameover');
   winnerEl.textContent = winner ? `Jogador ${winner} venceu!` : 'EMPATE!';
   playAgainBtn.setAttribute('style', 'display: block');
   playAgainBtn.addEventListener('click', () => window.location.reload());
   stopBgSong();
   playGameOverSong();
+
+  cb();
 };
 
 let playingOnHide = null;
@@ -179,4 +244,4 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-document.addEventListener('DOMContentLoaded', startGame);
+document.addEventListener('DOMContentLoaded', (_e) => startGame(addGameListeners));
