@@ -99,8 +99,8 @@ table {
   transform: translate(-50%);
   transition: height 1s ease-out;
   transform-origin: top;
-  top: 0;
-  left: -5px;
+  top: -9999px;
+  left: -5;
 
   &.first-column {
     height: 100%;
@@ -142,6 +142,7 @@ table {
   &.main-diagonal {
     rotate: -45deg;
     height: 140%;
+    top: 0;
   }
 
   &.secondary-diagonal {
@@ -191,7 +192,7 @@ button {
   }
 }
 
-.gameover {
+.hidden {
   display: none;
 }
 

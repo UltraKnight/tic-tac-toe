@@ -1,9 +1,9 @@
-const CACHE_NAME = "jogo-velha-v3.2";
+const CACHE_NAME = "jogo-velha-v3.3";
 const urlsToCache = [
   "index.html",
   "manifest.json",
-  "icons/icon-128.png",
-  "icons/icon-512.png"
+  "assets/icons/icon-128.png",
+  "assets/icons/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
