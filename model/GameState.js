@@ -21,14 +21,14 @@ export const WIN_POSITIONS = Object.freeze({
 export class GameState {
   audiosPlayingOnHide = null;
 
-  constructor(players = Players) {
+  constructor() {
+    this.players = { [Players.O]: { score: 0, symbol: Players.O }, [Players.X]: { score: 0, symbol: Players.X } };
     this.reset();
-    this.players = players;
   }
 
   reset() {
     this.board = new Array(3).fill(null).map(() => new Array(3).fill(null));
-    this.currPlayer = Players.O;
+    this.currPlayer = this.players[Players.O];
     this.musics = {
       bg: new Audio('assets/audio/Tic Tac Flow.mp3'),
       gameOver: new Audio('assets/audio/Game Over.mp3'),
@@ -50,19 +50,19 @@ export class GameState {
 
   checkWinCondition(row, col) {
     // Check row
-    if (this.board[row].every((cell) => cell === this.currPlayer)) {
+    if (this.board[row].every((cell) => cell === this.currPlayer.symbol)) {
       return WIN_POSITIONS.Rows[row];
     }
 
     // Check column
-    if (this.board.every((r) => r[col] === this.currPlayer)) {
+    if (this.board.every((r) => r[col] === this.currPlayer.symbol)) {
       return WIN_POSITIONS.Cols[col];
     }
 
     // Check main diagonal only if player choose a cell in it
     // The only way to win in a diagonal is to play in it
     // main diagonal can be determined by row === col
-    if (row === col && this.board.every((r, idx) => r[idx] === this.currPlayer)) {
+    if (row === col && this.board.every((r, idx) => r[idx] === this.currPlayer.symbol)) {
       return WIN_POSITIONS.MainDiagonal;
     }
 
@@ -71,7 +71,7 @@ export class GameState {
     // secondary diagonal can be determined by row + col = board.length -1
     if (
       row + col === this.board.length - 1 &&
-      this.board.every((r, idx) => r[this.board.length - 1 - idx] === this.currPlayer)
+      this.board.every((r, idx) => r[this.board.length - 1 - idx] === this.currPlayer.symbol)
     ) {
       return WIN_POSITIONS.SecondaryDiagonal;
     }
@@ -88,7 +88,19 @@ export class GameState {
   }
 
   switchPlayer() {
-    this.currPlayer = this.currPlayer === Players.X ? Players.O : Players.X;
+    this.currPlayer = this.currPlayer === this.players[Players.X] ? this.players[Players.O] : this.players[Players.X];
+  }
+
+  updateScore(playerSymbol) {
+    this.players[playerSymbol].score += 1;
+    return this.players[playerSymbol].score;
+  }
+
+  resetScore() {
+    Object.values(this.players).forEach((player) => {
+      player.score = 0;
+    });
+    return this.players;
   }
 
   getWinner() {
@@ -113,7 +125,7 @@ export class GameState {
   }
 
   updateBoardByIndexes(index1, index2) {
-    this.board[index1][index2] = this.currPlayer;
+    this.board[index1][index2] = this.currPlayer.symbol;
   }
 
   usePower(powerId) {

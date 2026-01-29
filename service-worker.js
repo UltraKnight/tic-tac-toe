@@ -1,4 +1,4 @@
-const CACHE_NAME = "jogo-velha-v3.3";
+const CACHE_NAME = "jogo-velha-v4.0";
 const urlsToCache = [
   "index.html",
   "manifest.json",

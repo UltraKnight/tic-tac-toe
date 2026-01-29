@@ -9,6 +9,9 @@ export class GameController {
       onUsePower: this.handleUsePower.bind(this),
       onGameOver: this.handleGameOver.bind(this),
       onPlayAgain: this.handlePlayAgain.bind(this),
+      onDocumentHidden: this.pauseGame.bind(this),
+      onDocumentVisible: this.resumeGame.bind(this),
+      onStartGame: this.startGame.bind(this),
       playAudio: () => this.playAudio(this.state.getMusic('bg')),
     });
   }
@@ -32,25 +35,25 @@ export class GameController {
       affectedPositions.forEach(({ row, col }) => {
         this.view.updateBoard(row, col, '🔥');
       });
-      this.view.updatePowersRow(powerId, isActive)
+      this.view.updatePowersRow(powerId, isActive);
     }
   }
 
   handlePlayAgain() {
-    this.state.reset();
-    this.view.render(this.state.board, true);
-    this.view.bindEvents();
+    this.startGame(false);
   }
 
   handleMove(row, col) {
     this.state.updateBoardByIndexes(row, col);
     const currPlayer = this.state.getCurrPlayer();
-    this.view.updateBoard(row, col, currPlayer);
+    this.view.updateBoard(row, col, currPlayer.symbol);
     const WIN_POS = this.state.checkWinCondition(row, col);
 
     if (WIN_POS) {
       this.state.setWinner(currPlayer);
       this.handleGameOver(WIN_POS);
+      const newScore = this.state.updateScore(currPlayer.symbol);
+      this.view.updateScore(currPlayer.symbol, newScore);
     } else if (this.state.isBoardFull()) {
       this.state.setWinner(null);
       this.handleGameOver();
@@ -67,8 +70,14 @@ export class GameController {
     this.view.unbindEvents();
   }
 
-  startGame() {
+  startGame(clearScore = true) {
+    this.state.reset();
+    this.view.render(this.state.board, true);
     this.view.bindEvents();
+    if (clearScore) {
+      const players = this.state.resetScore();
+      this.view.resetScore(players);
+    }
   }
 
   pauseGame() {

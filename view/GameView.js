@@ -6,19 +6,44 @@
 import { Players } from '../model/GameState.js';
 
 export class GameView {
-  constructor({ onCellClick, onUsePower, onGameOver, onPlayAgain, playAudio }) {
+  constructor({
+    onCellClick,
+    onUsePower,
+    onGameOver,
+    onPlayAgain,
+    onStartGame,
+    playAudio,
+    onDocumentVisible,
+    onDocumentHidden,
+  }) {
+    this.gameAreaEl = document.querySelector('.game-area');
     this.boardEl = document.querySelector('tbody');
     this.powersEl = document.querySelector('.powers-row');
-    this.gameOverEl = document.querySelector('.gameover');
     this.winnerMarkerEl = document.querySelector('.winner-marker');
+    this.p1InputEl = document.getElementById('player1-name');
+    this.p2InputEl = document.getElementById('player2-name');
+    this.p1LabelEl = document.getElementById('player1-label');
+    this.p2LabelEl = document.getElementById('player2-label');
+    this.startDialog = document.getElementById('start-dialog');
+    this.gameOverDialog = document.getElementById('gameover-dialog');
+    this.startGameButtons = document.querySelectorAll('.start-button');
+    this.playAgainButton = document.getElementById('play-again-button');
     this.onCellClick = onCellClick;
     this.onUsePower = onUsePower;
     this.onGameOver = onGameOver;
     this.onPlayAgain = onPlayAgain;
     this.playAudio = playAudio;
+    this.onStartGame = onStartGame;
+    this.onDocumentHidden = onDocumentHidden;
+    this.onDocumentVisible = onDocumentVisible;
+
     this.handleCellClick = this.handleCellClick.bind(this);
     this.usePower = this.usePower.bind(this);
     this.playAgain = this.playAgain.bind(this);
+    this.handleStartGame = this.handleStartGame.bind(this);
+    this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
+
+    this.bindPermanentEvents();
   }
 
   handleCellClick(e) {
@@ -30,6 +55,30 @@ export class GameView {
 
     if (cell.textContent) return;
     this.onCellClick(row, col);
+  }
+
+  handleVisibilityChange() {
+    if (document.hidden) {
+      this.onDocumentHidden();
+    } else {
+      this.onDocumentVisible();
+    }
+  }
+
+  bindPermanentEvents() {
+    this.p1InputEl.addEventListener('input', (e) => {
+      this.p1LabelEl.textContent = `${e.target.value || 'O'}: 0`;
+    });
+
+    this.p2InputEl.addEventListener('input', (e) => {
+      this.p2LabelEl.textContent = `${e.target.value || 'X'}: 0`;
+    });
+
+    this.startGameButtons.forEach((button) => {
+      button.addEventListener('click', this.handleStartGame);
+    });
+    this.playAgainButton.addEventListener('click', this.playAgain);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
   bindEvents() {
@@ -52,7 +101,7 @@ export class GameView {
 
     // is player movement
     if (value === Players.X || value === Players.O) {
-      cell.classList.toggle(value === Players.X ? 'primary' : 'secondary');
+      cell.classList.toggle(value === Players.O ? 'primary' : 'secondary');
       cell.classList.add('animate');
       cell.classList.remove('explode');
     } else {
@@ -99,28 +148,57 @@ export class GameView {
       this.powersEl.querySelectorAll('img').forEach((img) => {
         img.classList.add('active');
       });
-      this.gameOverEl.classList.add('hidden');
+      this.gameOverDialog.close();
       this.winnerMarkerEl.className = 'winner-marker';
     }
   }
 
+  handleStartGame() {
+    console.log('Game::Start');
+    this.startDialog.close();
+    this.gameAreaEl.classList.remove('hidden');
+    this.onStartGame();
+  }
+
   playAgain() {
-    const playAgainBtn = document.querySelector('button');
-    playAgainBtn.removeEventListener('click', this.playAgain);
+    this.gameAreaEl.classList.remove('hidden');
     this.onPlayAgain();
+  }
+
+  updateScore(player, score) {
+    if (player === Players.O) {
+      this.p1LabelEl.textContent = `${this.p1InputEl.value}: ${score}`;
+    } else if (player === Players.X) {
+      this.p2LabelEl.textContent = `${this.p2InputEl.value}: ${score}`;
+    }
+
+    const currentScoreEl = this.gameOverDialog.querySelector('.current-score');
+    currentScoreEl.textContent = this.p1LabelEl.textContent + ' | ' + this.p2LabelEl.textContent;
+  }
+
+  resetScore(players) {
+    this.p1LabelEl.textContent = `${this.p1InputEl.value}: ${players[Players.O].score}`;
+    this.p2LabelEl.textContent = `${this.p2InputEl.value}: ${players[Players.X].score}`;
   }
 
   setWinnerMarkerClass = (classToAdd) => {
     this.winnerMarkerEl.classList.add(classToAdd);
   };
 
+  getWinMessage(winner) {
+    const winnerName = winner.symbol === Players.O ? this.p1InputEl.value || 'O' : this.p2InputEl.value || 'X';
+    let message = winnerName ? `${winnerName} venceu!` : 'Empate!';
+
+    return message;
+  }
+
   showGameOver(winner, winPosition) {
-    const winnerEl = this.gameOverEl.lastElementChild;
-    this.gameOverEl.classList.remove('hidden');
-    winnerEl.textContent = winner ? `Jogador ${winner} venceu!` : 'EMPATE!';
-    const playAgainBtn = document.querySelector('button');
-    playAgainBtn.setAttribute('style', 'display: block');
-    playAgainBtn.addEventListener('click', this.playAgain);
+    const winnerEl = this.gameOverDialog.querySelector('.winner');
+    winnerEl.textContent = this.getWinMessage(winner);
     this.setWinnerMarkerClass(winPosition);
+    setTimeout(() => {
+      this.gameAreaEl.classList.add('hidden');
+      this.gameOverDialog.showModal();
+    }, 1500);
   }
 }

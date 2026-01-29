@@ -7,55 +7,72 @@
     <title>Tic Tac Toe</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="icon" type="image/x-icon" href="assets/icons/icon-128.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
     <script type="module">
       'serviceWorker' in navigator && navigator.serviceWorker.register('service-worker.js');
-      import { GameController } from './controller/GameController.js';
-      const controller = new GameController();
-      document.addEventListener('DOMContentLoaded', controller.startGame.bind(controller));
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          controller.pauseGame();
-        } else {
-          controller.resumeGame();
-        }
-      });
+      import './init.js';
     </script>
   </head>
   <body>
-    <button>Jogar Novamente</button>
-    <div class="game-area">
-      <table>
-        <tbody>
-          <tr>
-            <td data-row="0" data-col="0"></td>
-            <td data-row="0" data-col="1"></td>
-            <td data-row="0" data-col="2"></td>
-          </tr>
-          <tr>
-            <td data-row="1" data-col="0"></td>
-            <td data-row="1" data-col="1"></td>
-            <td data-row="1" data-col="2"></td>
-          </tr>
-          <tr>
-            <td data-row="2" data-col="0"></td>
-            <td data-row="2" data-col="1"></td>
-            <td data-row="2" data-col="2"></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="winner-marker"></div>
-    </div>
-    <div class="gameover hidden">
-      <h1>Fim de Jogo!</h1>
-      <h2 class="winner"></h2>
-    </div>
-    <h3 class="p1-label">Player 1: X</h3>
-    <h3 class="p2-label">Player 2: O</h3>
-    <div class="powers">
-      <h2>Poderes</h2>
-      <section class="powers-row">
-        <img id="bomb" class="active" src="assets/icons/bomb.svg" alt="bomb" />
-      </section>
+    <dialog id="start-dialog" open>
+      <div>
+        <h1>Jogo da Velha!</h1>
+        <div>
+          <label for="player1-name">O:</label>
+          <input type="text" id="player1-name" maxlength="9" value="O" />
+        </div>
+        <div>
+          <label for="player2-name">X:</label>
+          <input type="text" id="player2-name" maxlength="9" value="X" />
+        </div>
+        <button class="start-button">Novo Jogo</button>
+      </div>
+    </dialog>
+    <dialog id="gameover-dialog">
+      <div>
+        <h1 class="winner"></h1>
+        <h2 class="current-score"></h2>
+        <button id="play-again-button">Revanche</button>
+        <button class="start-button">Novo Jogo</button>
+      </div>
+    </dialog>
+    <div class="game-area hidden">
+      <div class="players-labels">
+        <h3 id="player1-label">O: 0</h3>
+        <h3 id="player2-label">X: 0</h3>
+      </div>
+      <div id="board">
+        <table>
+          <tbody>
+            <tr>
+              <td data-row="0" data-col="0"></td>
+              <td data-row="0" data-col="1"></td>
+              <td data-row="0" data-col="2"></td>
+            </tr>
+            <tr>
+              <td data-row="1" data-col="0"></td>
+              <td data-row="1" data-col="1"></td>
+              <td data-row="1" data-col="2"></td>
+            </tr>
+            <tr>
+              <td data-row="2" data-col="0"></td>
+              <td data-row="2" data-col="1"></td>
+              <td data-row="2" data-col="2"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="winner-marker"></div>
+      </div>
+      <div class="powers">
+        <h2>Poderes</h2>
+        <section class="powers-row">
+          <img id="bomb" class="active" src="assets/icons/bomb.svg" alt="bomb" />
+        </section>
+      </div>
     </div>
   </body>
 </html>
