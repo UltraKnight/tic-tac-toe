@@ -199,6 +199,6 @@ export class GameView {
     setTimeout(() => {
       this.gameAreaEl.classList.add('hidden');
       this.gameOverDialog.showModal();
-    }, 1500);
+    }, winner ? 1500 : 100);
   }
 }
