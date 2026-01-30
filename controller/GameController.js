@@ -36,6 +36,7 @@ export class GameController {
         this.view.updateBoard(row, col, '🔥');
       });
       this.view.updatePowersRow(powerId, isActive);
+      this.state.switchPlayer();
     }
   }
 
