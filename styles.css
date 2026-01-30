@@ -1,5 +1,6 @@
 :root {
   --bg: #2e2e3a;
+  --powers-bg: #3e3e50;
   --text-primary: #ffc857;
   --text-secondary: #fb8500;
   --blue-border: rgb(77, 157, 255);
@@ -22,6 +23,13 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.game-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 label {
@@ -61,16 +69,42 @@ dialog {
     text-align: center;
   }
 
-  h1, h2 {
+  h1,
+  h2 {
     margin-bottom: 15px;
+  }
+
+  .current-score {
+    font-size: 0.8rem;
   }
 }
 
 .players-labels {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.8rem;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
   margin-bottom: 10px;
+  border: 1px solid var(--blue-border);
+  padding: 10px;
+
+  & span {
+    color: var(--success);
+    font-size: 1rem;
+    user-select: none;
+
+    &:first-of-type {
+      margin-left: 30px;
+      margin-right: auto;
+    }
+
+    &:last-of-type {
+      margin-right: 30px;
+      margin-left: auto;
+    }
+  }
 }
 
 #board {
@@ -99,12 +133,12 @@ table {
     }
 
     tr:nth-of-type(2) > td {
-      border-block: 8px solid var(--blue-border);
+      border-block: 8px solid var(--light-blue-border);
     }
 
     tr {
       :nth-child(2) {
-        border-inline: 8px solid var(--blue-border);
+        border-inline: 8px solid var(--light-blue-border);
       }
     }
 
@@ -115,10 +149,6 @@ table {
       vertical-align: middle;
       font-size: 4rem;
       font-weight: 800;
-      animation-name: color;
-      animation-duration: 1s;
-      animation-direction: alternate;
-      animation-iteration-count: infinite;
 
       &.primary {
         color: var(--text-primary);
@@ -152,24 +182,24 @@ table {
   transition: height 1s ease-out;
   transform-origin: top;
   top: -9999px;
-  left: -5;
+  left: -15px;
 
   &.first-column {
     height: 100%;
     left: 50px;
-    top: -5px;
+    top: -10px;
   }
 
   &.second-column {
     height: 100%;
     left: 50%;
-    top: -5px;
+    top: -10px;
   }
 
   &.third-column {
     height: 100%;
     left: 270px;
-    top: -5px;
+    top: -10px;
   }
 
   &.first-row {
@@ -186,7 +216,7 @@ table {
 
   &.third-row {
     height: 100%;
-    left: 100%;
+    left: calc(100% + 5px);
     rotate: 90deg;
     top: 275px;
   }
@@ -255,13 +285,16 @@ button {
 .powers {
   margin-top: 15px;
   text-align: center;
+  width: 100%;
 }
 
 .powers-row {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  padding: 5px 0;
+  gap: 30px;
   margin-top: 5px;
+  background-color: var(--powers-bg);
 
   img {
     width: 50px;
@@ -277,16 +310,6 @@ button {
     &:hover {
       transform: scale(1.1);
     }
-  }
-}
-
-@keyframes color {
-  from {
-    border-color: var(--blue-border);
-  }
-
-  to {
-    border-color: var(--light-blue-border);
   }
 }
 

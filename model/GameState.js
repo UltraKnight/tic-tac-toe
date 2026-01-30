@@ -41,7 +41,31 @@ export class GameState {
           const lineToRemove = Math.floor(Math.random() * this.board.length);
           this.board[lineToRemove] = new Array(3).fill(null);
           const affectedPositions = this.board[lineToRemove].map((_, col) => ({ row: lineToRemove, col }));
-          return { affectedPositions }; //  [{row, col}, ...]
+          return { affectedPositions, redraw: false }; //  [{row, col}, ...]
+        },
+      },
+      shuffle: {
+        active: true,
+        action() {
+          const currentBoard = this.board.flat();
+          // Shuffle the board values
+          for (let i = currentBoard.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentBoard[i], currentBoard[j]] = [currentBoard[j], currentBoard[i]];
+          }
+          // Reassign shuffled values back to the board
+          this.board = [];
+          for (let r = 0; r < 3; r++) {
+            // get values for each row
+            // 0 * 3 = 0 to 0 * 3 + 3 = 3
+            // 1 * 3 = 3 to 1 * 3 + 3 = 6
+            // 2 * 3 = 6 to 2 * 3 + 3 = 9
+            this.board.push(currentBoard.slice(r * 3, r * 3 + 3));
+          }
+          return {
+            redraw: true,
+            affectedPositions: [], // No specific positions affected
+          };
         },
       },
     };
@@ -139,7 +163,7 @@ export class GameState {
   }
 
   getBoard() {
-    return this.currentGame;
+    return this.board;
   }
 
   getCurrPlayer() {

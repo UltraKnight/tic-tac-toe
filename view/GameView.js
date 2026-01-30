@@ -4,6 +4,8 @@
 // @author        Vanderlei Martins
 
 import { Players } from '../model/GameState.js';
+const PLAYER_1_CELL_CLASS = 'primary';
+const PLAYER_2_CELL_CLASS = 'secondary';
 
 export class GameView {
   constructor({
@@ -28,6 +30,8 @@ export class GameView {
     this.gameOverDialog = document.getElementById('gameover-dialog');
     this.startGameButtons = document.querySelectorAll('.start-button');
     this.playAgainButton = document.getElementById('play-again-button');
+    this.leftArrowEl = document.querySelector('#leftArrow')
+    this.rightArrowEl = document.querySelector('#rightArrow')
     this.onCellClick = onCellClick;
     this.onUsePower = onUsePower;
     this.onGameOver = onGameOver;
@@ -55,6 +59,11 @@ export class GameView {
 
     if (cell.textContent) return;
     this.onCellClick(row, col);
+  }
+
+  togglePlayerArrow() {
+    this.leftArrowEl.classList.toggle('hidden');
+    this.rightArrowEl.classList.toggle('hidden');
   }
 
   handleVisibilityChange() {
@@ -101,11 +110,11 @@ export class GameView {
 
     // is player movement
     if (value === Players.X || value === Players.O) {
-      cell.classList.toggle(value === Players.O ? 'primary' : 'secondary');
+      cell.classList.toggle(value === Players.O ? PLAYER_1_CELL_CLASS : PLAYER_2_CELL_CLASS);
       cell.classList.add('animate');
       cell.classList.remove('explode');
     } else {
-      cell.classList.remove('primary', 'secondary', 'animate');
+      cell.classList.remove(PLAYER_1_CELL_CLASS, PLAYER_2_CELL_CLASS, 'animate');
       cell.classList.add('explode');
       // is powerup
       cell.addEventListener(
@@ -140,6 +149,12 @@ export class GameView {
         const cell = this.boardEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
         cell.textContent = value ?? '';
         cell.className = '';
+        if (value === Players.O || value === Players.X) {
+          requestAnimationFrame(() => {
+            const playerClassName = value === Players.O ? PLAYER_1_CELL_CLASS : PLAYER_2_CELL_CLASS;
+            cell.className = `${playerClassName} animate`;
+          });
+        }
       });
     });
 
@@ -196,9 +211,12 @@ export class GameView {
     const winnerEl = this.gameOverDialog.querySelector('.winner');
     winnerEl.textContent = this.getWinMessage(winner);
     this.setWinnerMarkerClass(winPosition);
-    setTimeout(() => {
-      this.gameAreaEl.classList.add('hidden');
-      this.gameOverDialog.showModal();
-    }, winner ? 1500 : 100);
+    setTimeout(
+      () => {
+        this.gameAreaEl.classList.add('hidden');
+        this.gameOverDialog.showModal();
+      },
+      winner ? 1500 : 100,
+    );
   }
 }

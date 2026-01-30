@@ -28,15 +28,16 @@ export class GameController {
   handleUsePower(powerId) {
     if (this.state.isBoardEmpty()) return;
 
-    const { isActive, affectedPositions } = this.state.usePower(powerId);
+    const { isActive, affectedPositions, redraw } = this.state.usePower(powerId);
     if (isActive) {
       const explosionSfx = this.state.getMusic('explosion');
       this.playAudio(explosionSfx);
       affectedPositions.forEach(({ row, col }) => {
         this.view.updateBoard(row, col, '🔥');
       });
+      redraw && this.view.render(this.state.getBoard(), false);
       this.view.updatePowersRow(powerId, isActive);
-      this.state.switchPlayer();
+      this.handleSwitchPlayer();
     }
   }
 
@@ -59,8 +60,13 @@ export class GameController {
       this.state.setWinner(null);
       this.handleGameOver();
     } else {
-      this.state.switchPlayer();
+      this.handleSwitchPlayer();
     }
+  }
+
+  handleSwitchPlayer() {
+    this.state.switchPlayer();
+    this.view.togglePlayerArrow();
   }
 
   handleGameOver(winPosition) {
@@ -73,7 +79,7 @@ export class GameController {
 
   startGame(clearScore = true) {
     this.state.reset();
-    this.view.render(this.state.board, true);
+    this.view.render(this.state.getBoard(), true);
     this.view.bindEvents();
     if (clearScore) {
       const players = this.state.resetScore();
