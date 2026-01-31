@@ -207,7 +207,7 @@ export class GameView {
 
   getWinMessage(winner) {
     const winnerName = winner?.symbol === Players.O ? this.p1InputEl.value || 'O' : this.p2InputEl.value || 'X';
-    let message = winner ? `${winnerName} venceu!` : 'Empate!';
+    let message = winner ? `${winnerName} Won!` : 'Draw!';
 
     return message;
   }
