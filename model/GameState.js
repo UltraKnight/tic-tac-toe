@@ -155,14 +155,14 @@ export class GameState {
     // The only way to win in a diagonal is to play in it
     // main diagonal can be determined by row === col
     if (row === col && !result) {
-      result = this.checkWinConditionOnMainDiagonal(row, col, this.currPlayer);
+      result = this.checkWinConditionOnMainDiagonal(this.currPlayer);
     }
 
     // Check secondary diagonal
     // The only way to win in a diagonal is to play in it
     // secondary diagonal can be determined by row + col = board.length -1
     if (row + col === this.board.length - 1 && !result) {
-      result = this.checkWinConditionOnSecondaryDiagonal(row, col, this.currPlayer);
+      result = this.checkWinConditionOnSecondaryDiagonal(this.currPlayer);
     }
 
     return result;
