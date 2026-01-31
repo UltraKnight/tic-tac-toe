@@ -109,13 +109,18 @@ export class GameView {
     cell.textContent = transitionalValue ?? value ?? '';
 
     // is player movement
-    if (value === Players.X || value === Players.O) {
+    if ((value === Players.X || value === Players.O) && !(transitionalValue || animationClassName)) {
       cell.classList.toggle(value === Players.O ? PLAYER_1_CELL_CLASS : PLAYER_2_CELL_CLASS);
       cell.classList.add('animate');
       cell.classList.remove('explode');
     } else if (animationClassName) {
-      cell.classList.remove(PLAYER_1_CELL_CLASS, PLAYER_2_CELL_CLASS, 'animate');
-      cell.classList.add(animationClassName);
+      cell.className = '';
+      value !== '' && cell.classList.add(value === Players.O ? PLAYER_1_CELL_CLASS : PLAYER_2_CELL_CLASS);
+
+      requestAnimationFrame(() => {
+        cell.classList.add(animationClassName);
+      });
+
       // is powerup
       cell.addEventListener(
         'animationend',

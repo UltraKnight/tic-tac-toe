@@ -6,6 +6,7 @@ export const Players = Object.freeze({
 export const POWERS = Object.freeze({
   bomb: 'bomb',
   shuffle: 'shuffle',
+  change: 'change',
 });
 
 export const WIN_POSITIONS = Object.freeze({
@@ -45,8 +46,32 @@ export class GameState {
         action() {
           const lineToRemove = Math.floor(Math.random() * this.board.length);
           this.board[lineToRemove] = new Array(3).fill(null);
-          const affectedPositions = this.board[lineToRemove].map((_, col) => ({ row: lineToRemove, col }));
-          return { affectedPositions, redraw: false, canHaveWinner: false }; //  [{row, col}, ...]
+          const affectedPositions = this.board[lineToRemove].map((_, col) => ({
+            row: lineToRemove,
+            col,
+            replacer: '',
+          }));
+          return { affectedPositions, redraw: false }; //  [{row, col}, ...]
+        },
+      },
+      [POWERS.change]: {
+        active: true,
+        action() {
+          const xPositions = this.getPositionsOfSymbol(Players.X);
+          const oPositions = this.getPositionsOfSymbol(Players.O);
+          const randomXPosition = xPositions[Math.floor(Math.random() * xPositions.length)];
+          const randomOPosition = oPositions[Math.floor(Math.random() * oPositions.length)];
+          randomXPosition && (this.board[randomXPosition.row][randomXPosition.col] = Players.O);
+          randomOPosition && (this.board[randomOPosition.row][randomOPosition.col] = Players.X);
+
+          return {
+            redraw: false,
+            affectedPositions: [
+              { ...randomXPosition, replacer: Players.O },
+              { ...randomOPosition, replacer: Players.X },
+            ], // No specific positions affected
+            canHaveWinner: true,
+          };
         },
       },
       [POWERS.shuffle]: {
@@ -171,6 +196,16 @@ export class GameState {
     }
 
     return result;
+  }
+
+  getPositionsOfSymbol(playerSymbol) {
+    return this.board.reduce((symbolPositions, currRow, currRowIndex) => {
+      currRow.forEach((cell, cellIndex) => {
+        if (cell === playerSymbol) symbolPositions.push({ row: currRowIndex, col: cellIndex });
+      });
+
+      return symbolPositions;
+    }, []);
   }
 
   isBoardFull() {

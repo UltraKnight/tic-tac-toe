@@ -34,11 +34,18 @@ export class GameController {
         case POWERS.bomb:
           const explosionSfx = this.state.getMusic('explosion');
           this.playAudio(explosionSfx);
-          affectedPositions.forEach(({ row, col }) => {
-            this.view.updateBoard(row, col, '', { className: 'explode', transitionalValue: '🔥' });
+          affectedPositions.forEach(({ row, col, replacer }) => {
+            this.view.updateBoard(row, col, replacer, { className: 'explode', transitionalValue: '🔥' });
           });
+          break;
+        case POWERS.change:
+          affectedPositions.forEach(({ row, col, replacer }) => {
+            this.view.updateBoard(row, col, replacer, { className: 'animate', transitionalValue: replacer });
+          });
+          break;
         case POWERS.shuffle:
         default:
+          break;
       }
 
       redraw && this.view.render(this.state.getBoard(), false);
