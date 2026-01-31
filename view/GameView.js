@@ -30,8 +30,8 @@ export class GameView {
     this.gameOverDialog = document.getElementById('gameover-dialog');
     this.startGameButtons = document.querySelectorAll('.start-button');
     this.playAgainButton = document.getElementById('play-again-button');
-    this.leftArrowEl = document.querySelector('#leftArrow')
-    this.rightArrowEl = document.querySelector('#rightArrow')
+    this.leftArrowEl = document.querySelector('#leftArrow');
+    this.rightArrowEl = document.querySelector('#rightArrow');
     this.onCellClick = onCellClick;
     this.onUsePower = onUsePower;
     this.onGameOver = onGameOver;
@@ -101,26 +101,26 @@ export class GameView {
     this.boardEl.removeEventListener('click', this.handleCellClick);
   }
 
-  updateBoard(rowIndex, colIndex, value) {
+  updateBoard(rowIndex, colIndex, value, { className: animationClassName, transitionalValue } = {}) {
     const cell = this.boardEl.querySelector(`[data-row="${rowIndex}"][data-col="${colIndex}"]`);
 
     if (!cell) return;
 
-    cell.textContent = value ?? '';
+    cell.textContent = transitionalValue ?? value ?? '';
 
     // is player movement
     if (value === Players.X || value === Players.O) {
       cell.classList.toggle(value === Players.O ? PLAYER_1_CELL_CLASS : PLAYER_2_CELL_CLASS);
       cell.classList.add('animate');
       cell.classList.remove('explode');
-    } else {
+    } else if (animationClassName) {
       cell.classList.remove(PLAYER_1_CELL_CLASS, PLAYER_2_CELL_CLASS, 'animate');
-      cell.classList.add('explode');
+      cell.classList.add(animationClassName);
       // is powerup
       cell.addEventListener(
         'animationend',
         () => {
-          cell.textContent = '';
+          cell.textContent = value || '';
         },
         { once: true },
       );

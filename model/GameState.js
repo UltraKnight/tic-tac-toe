@@ -3,6 +3,11 @@ export const Players = Object.freeze({
   X: 'X',
 });
 
+export const POWERS = Object.freeze({
+  bomb: 'bomb',
+  shuffle: 'shuffle',
+});
+
 export const WIN_POSITIONS = Object.freeze({
   Rows: {
     0: 'first-row',
@@ -35,7 +40,7 @@ export class GameState {
       explosion: new Audio('assets/audio/Explosion.mp3'),
     };
     this.powers = {
-      bomb: {
+      [POWERS.bomb]: {
         active: true,
         action() {
           const lineToRemove = Math.floor(Math.random() * this.board.length);
@@ -44,7 +49,7 @@ export class GameState {
           return { affectedPositions, redraw: false, canHaveWinner: false }; //  [{row, col}, ...]
         },
       },
-      shuffle: {
+      [POWERS.shuffle]: {
         active: true,
         action() {
           const currentBoard = this.board.flat();

@@ -1,4 +1,4 @@
-import { GameState } from '../model/GameState.js';
+import { GameState, POWERS } from '../model/GameState.js';
 import { GameView } from '../view/GameView.js';
 
 export class GameController {
@@ -30,13 +30,20 @@ export class GameController {
 
     const { isActive, affectedPositions, redraw, canHaveWinner } = this.state.usePower(powerId);
     if (isActive) {
-      const explosionSfx = this.state.getMusic('explosion');
-      this.playAudio(explosionSfx);
-      affectedPositions.forEach(({ row, col }) => {
-        this.view.updateBoard(row, col, '🔥');
-      });
+      switch (powerId) {
+        case POWERS.bomb:
+          const explosionSfx = this.state.getMusic('explosion');
+          this.playAudio(explosionSfx);
+          affectedPositions.forEach(({ row, col }) => {
+            this.view.updateBoard(row, col, '', { className: 'explode', transitionalValue: '🔥' });
+          });
+        case POWERS.shuffle:
+        default:
+      }
+
       redraw && this.view.render(this.state.getBoard(), false);
       this.view.updatePowersRow(powerId, isActive);
+
       if (canHaveWinner) {
         const { result: winResult, winner } = this.state.checkWinConditionOnBoard();
         if (winResult) {
