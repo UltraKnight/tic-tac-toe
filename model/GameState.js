@@ -41,7 +41,7 @@ export class GameState {
           const lineToRemove = Math.floor(Math.random() * this.board.length);
           this.board[lineToRemove] = new Array(3).fill(null);
           const affectedPositions = this.board[lineToRemove].map((_, col) => ({ row: lineToRemove, col }));
-          return { affectedPositions, redraw: false }; //  [{row, col}, ...]
+          return { affectedPositions, redraw: false, canHaveWinner: false }; //  [{row, col}, ...]
         },
       },
       shuffle: {
@@ -65,6 +65,7 @@ export class GameState {
           return {
             redraw: true,
             affectedPositions: [], // No specific positions affected
+            canHaveWinner: true,
           };
         },
       },
@@ -72,35 +73,99 @@ export class GameState {
     this.winner = null;
   }
 
-  checkWinCondition(row, col) {
-    // Check row
-    if (this.board[row].every((cell) => cell === this.currPlayer.symbol)) {
+  checkWinConditionOnRow(row, player) {
+    if (this.board[row].every((cell) => cell === player.symbol)) {
       return WIN_POSITIONS.Rows[row];
     }
 
-    // Check column
-    if (this.board.every((r) => r[col] === this.currPlayer.symbol)) {
+    return false;
+  }
+
+  checkWinConditionOnColumn(col, player) {
+    if (this.board.every((row) => row[col] === player.symbol)) {
       return WIN_POSITIONS.Cols[col];
     }
 
+    return false;
+  }
+
+  checkWinConditionOnMainDiagonal(player) {
+    if (this.board.every((r, idx) => r[idx] === player.symbol)) {
+      return WIN_POSITIONS.MainDiagonal;
+    }
+
+    return false;
+  }
+
+  checkWinConditionOnSecondaryDiagonal(player) {
+    if (this.board.every((r, idx) => r[this.board.length - 1 - idx] === player.symbol)) {
+      return WIN_POSITIONS.SecondaryDiagonal;
+    }
+
+    return false;
+  }
+
+  // the power up shuffle moves all symbols on the board
+  // causing the chance of a win condition for both players
+  checkWinConditionOnBoard() {
+    let hasWonOnMainDiagonal = false;
+    let hasWonOnSecondaryDiagonal = false;
+    let hasWonOnRow = false;
+    let hasWonOnCol = false;
+    let winner = null;
+    let result = false;
+    const nextPlayer = Object.values(this.players).filter((v) => v.symbol != this.currPlayer.symbol)[0];
+
+    const checkWinner = (player) => {
+      hasWonOnMainDiagonal = this.checkWinConditionOnMainDiagonal(player);
+      hasWonOnSecondaryDiagonal = this.checkWinConditionOnSecondaryDiagonal(player);
+
+      this.board.forEach((_, position) => {
+        if (!hasWonOnRow) {
+          hasWonOnRow = this.checkWinConditionOnRow(position, player);
+        }
+        if (!hasWonOnCol) {
+          // the board has the same ammount of rows and cols
+          // no need to complicate the logic
+          hasWonOnCol = this.checkWinConditionOnColumn(position, player);
+        }
+      });
+      result = hasWonOnMainDiagonal || hasWonOnSecondaryDiagonal || hasWonOnRow || hasWonOnCol;
+      winner = player;
+
+      return result;
+    };
+
+    // prioritize current player
+    const currentPlayerWon = checkWinner(this.currPlayer);
+    !currentPlayerWon && checkWinner(nextPlayer);
+
+    return { result, winner };
+  }
+
+  checkWinConditionOnMove(row, col) {
+    let result = false;
+
+    // Check row
+    result = this.checkWinConditionOnRow(row, this.currPlayer);
+
+    // Check columnon
+    result = result || this.checkWinConditionOnColumn(col, this.currPlayer);
     // Check main diagonal only if player choose a cell in it
     // The only way to win in a diagonal is to play in it
     // main diagonal can be determined by row === col
-    if (row === col && this.board.every((r, idx) => r[idx] === this.currPlayer.symbol)) {
-      return WIN_POSITIONS.MainDiagonal;
+    if (row === col && !result) {
+      result = this.checkWinConditionOnMainDiagonal(row, col, this.currPlayer);
     }
 
     // Check secondary diagonal
     // The only way to win in a diagonal is to play in it
     // secondary diagonal can be determined by row + col = board.length -1
-    if (
-      row + col === this.board.length - 1 &&
-      this.board.every((r, idx) => r[this.board.length - 1 - idx] === this.currPlayer.symbol)
-    ) {
-      return WIN_POSITIONS.SecondaryDiagonal;
+    if (row + col === this.board.length - 1 && !result) {
+      result = this.checkWinConditionOnSecondaryDiagonal(row, col, this.currPlayer);
     }
 
-    return false;
+    return result;
   }
 
   isBoardFull() {
@@ -155,11 +220,11 @@ export class GameState {
   usePower(powerId) {
     if (this.powers[powerId]?.active) {
       this.powers[powerId].active = false;
-      const affectedPositions = this.powers[powerId].action.call(this);
-      return { isActive: true, ...affectedPositions };
+      const { affectedPositions, canHaveWinner, redraw } = this.powers[powerId].action.call(this);
+      return { isActive: true, affectedPositions, canHaveWinner, redraw };
     }
 
-    return { isActive: false, affectedPositions: [] };
+    return { isActive: false, affectedPositions: [], canHaveWinner: false, redraw: false };
   }
 
   getBoard() {
@@ -168,9 +233,6 @@ export class GameState {
 
   getCurrPlayer() {
     return this.currPlayer;
-  }
-  setCurrPlayer(player) {
-    this.currPlayer = player;
   }
 
   pauseAllAudios() {

@@ -28,7 +28,7 @@ export class GameController {
   handleUsePower(powerId) {
     if (this.state.isBoardEmpty()) return;
 
-    const { isActive, affectedPositions, redraw } = this.state.usePower(powerId);
+    const { isActive, affectedPositions, redraw, canHaveWinner } = this.state.usePower(powerId);
     if (isActive) {
       const explosionSfx = this.state.getMusic('explosion');
       this.playAudio(explosionSfx);
@@ -37,7 +37,19 @@ export class GameController {
       });
       redraw && this.view.render(this.state.getBoard(), false);
       this.view.updatePowersRow(powerId, isActive);
-      this.handleSwitchPlayer();
+      if (canHaveWinner) {
+        const { result: winResult, winner } = this.state.checkWinConditionOnBoard();
+        if (winResult) {
+          this.state.setWinner(winner);
+          this.handleGameOver(winResult);
+          const newScore = this.state.updateScore(winner.symbol);
+          this.view.updateScore(winner.symbol, newScore);
+        } else {
+          this.handleSwitchPlayer();
+        }
+      } else {
+        this.handleSwitchPlayer();
+      }
     }
   }
 
@@ -49,7 +61,7 @@ export class GameController {
     this.state.updateBoardByIndexes(row, col);
     const currPlayer = this.state.getCurrPlayer();
     this.view.updateBoard(row, col, currPlayer.symbol);
-    const WIN_POS = this.state.checkWinCondition(row, col);
+    const WIN_POS = this.state.checkWinConditionOnMove(row, col);
 
     if (WIN_POS) {
       this.state.setWinner(currPlayer);
