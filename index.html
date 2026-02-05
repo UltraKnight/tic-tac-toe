@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
-    <meta
-      property="og:image"
-      content="https://ultraknight.github.io/tic-tac-toe/assets/screenshot.png"
-    />
+    <meta property="og:image" content="https://ultraknight.github.io/tic-tac-toe/assets/screenshot.png" />
     <meta name="author" content="Vanderlei Ignacio Martins" />
 
     <meta property="og:title" content="Tic Tac Toe" />
@@ -30,6 +27,7 @@
     <script type="module">
       'serviceWorker' in navigator && navigator.serviceWorker.register('service-worker.js');
       import './init.js';
+      import './installBtn.js';
     </script>
   </head>
   <body>
@@ -45,6 +43,7 @@
           <input type="text" id="player2-name" maxlength="9" value="X" />
         </div>
         <button class="start-button">New Game</button>
+        <button id="install-btn" class="secondary">Install App</button>
       </div>
     </dialog>
     <dialog id="gameover-dialog">

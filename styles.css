@@ -1,7 +1,7 @@
 :root {
   --bg: #2e2e3a;
   --powers-bg: #3e3e50;
-  --text-primary: #ffc857;
+  --text-primary: #ffba30;
   --text-secondary: #fb8500;
   --blue-border: rgb(77, 157, 255);
   --light-blue-border: rgb(0, 195, 255);
@@ -266,6 +266,15 @@ button {
   font-size: 1.2rem;
   padding: 0.5rem;
   margin-bottom: 10px;
+
+  &.secondary {
+    border-color: var(--text-secondary);
+
+    &:hover:not(:disabled) {
+      color: var(--bg);
+      background-color: var(--text-secondary);
+    }
+  }
 
   &:hover:not(:disabled) {
     color: var(--bg);
