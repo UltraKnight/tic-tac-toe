@@ -12,7 +12,7 @@ export class GameController {
       onDocumentHidden: this.pauseGame.bind(this),
       onDocumentVisible: this.resumeGame.bind(this),
       onStartGame: this.startGame.bind(this),
-      playAudio: () => this.playAudio(this.state.getMusic('bg')),
+      playAudio: () => this.playAudio(this.state.getMusic('bg'), 0.5),
     });
   }
 

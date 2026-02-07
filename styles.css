@@ -77,6 +77,28 @@ dialog {
   .current-score {
     font-size: 0.8rem;
   }
+
+  ul {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: var(--text-primary);
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+
+    & > li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      & > img {
+        float: left;
+        width: 30px;
+        height: 30px;
+      }
+    } 
+  }
 }
 
 .players-labels {
@@ -320,6 +342,13 @@ button {
       transform: scale(1.1);
     }
   }
+}
+
+#help-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 25px;
+  margin-top: 10px;
 }
 
 @keyframes pop {

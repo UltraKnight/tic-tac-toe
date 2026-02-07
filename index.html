@@ -54,10 +54,30 @@
         <button class="start-button">New Game</button>
       </div>
     </dialog>
+    <dialog id="help-dialog">
+      <button>Close</button>
+      <ul>
+        <li>
+          <img id="bomb" class="active" src="assets/icons/bomb.svg" alt="bomb" />
+          <p>bomb - removes a random row from the board</p>
+        </li>
+        <li>
+          <img id="shuffle" class="active" src="assets/icons/icon-128.png" alt="shuffle" />
+          <p>shuffle - shuffles the current board state</p>
+        </li>
+        <li>
+          <img id="change" class="active" src="assets/icons/change.svg" alt="change" />
+          <p>
+            change - changes one of your mark with the opponent's mark on the board, if there is only one symbol on the
+            board, it will change it to the opposite symbol
+          </p>
+        </li>
+      </ul>
+    </dialog>
     <div class="game-area hidden">
       <div class="players-labels">
         <h3 id="player1-label">O: 0</h3>
-        <span id="leftArrow"><</span><span class="hidden" id="rightArrow">></span>
+        <span id="left-arrow"><</span><span class="hidden" id="right-arrow">></span>
         <h3 id="player2-label">X: 0</h3>
       </div>
       <div id="board">
@@ -89,6 +109,7 @@
           <img id="change" class="active" src="assets/icons/change.svg" alt="change" />
         </section>
       </div>
+      <button id="help-button">?</button>
     </div>
   </body>
 </html>

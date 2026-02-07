@@ -28,10 +28,12 @@ export class GameView {
     this.p2LabelEl = document.getElementById('player2-label');
     this.startDialog = document.getElementById('start-dialog');
     this.gameOverDialog = document.getElementById('gameover-dialog');
+    this.helpDialog = document.getElementById('help-dialog');
     this.startGameButtons = document.querySelectorAll('.start-button');
     this.playAgainButton = document.getElementById('play-again-button');
-    this.leftArrowEl = document.querySelector('#leftArrow');
-    this.rightArrowEl = document.querySelector('#rightArrow');
+    this.helpButton = document.getElementById('help-button');
+    this.leftArrowEl = document.getElementById('left-arrow');
+    this.rightArrowEl = document.getElementById('right-arrow');
     this.onCellClick = onCellClick;
     this.onUsePower = onUsePower;
     this.onGameOver = onGameOver;
@@ -46,6 +48,8 @@ export class GameView {
     this.playAgain = this.playAgain.bind(this);
     this.handleStartGame = this.handleStartGame.bind(this);
     this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
+    this.openHelpDialog = this.openHelpDialog.bind(this);
+    this.closeHelpDialog = this.closeHelpDialog.bind(this);
 
     this.bindPermanentEvents();
   }
@@ -75,6 +79,8 @@ export class GameView {
   }
 
   bindPermanentEvents() {
+    const closeHelpDialogButton = this.helpDialog.querySelector('button');
+
     this.p1InputEl.addEventListener('input', (e) => {
       this.p1LabelEl.textContent = `${e.target.value || 'O'}: 0`;
     });
@@ -88,6 +94,9 @@ export class GameView {
     });
     this.playAgainButton.addEventListener('click', this.playAgain);
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
+
+    this.helpButton.addEventListener('click', this.openHelpDialog);
+    closeHelpDialogButton.addEventListener('click', this.closeHelpDialog);
   }
 
   bindEvents() {
@@ -223,5 +232,13 @@ export class GameView {
       },
       winner ? 1500 : 100,
     );
+  }
+
+  openHelpDialog() {
+    this.helpDialog.showModal();
+  }
+
+  closeHelpDialog() {
+    this.helpDialog.close();
   }
 }
