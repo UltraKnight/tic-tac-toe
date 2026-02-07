@@ -179,6 +179,8 @@ export class GameView {
       });
       this.gameOverDialog.close();
       this.winnerMarkerEl.className = 'winner-marker';
+      this.leftArrowEl.classList.remove('hidden');
+      this.rightArrowEl.classList.add('hidden');
     }
   }
 
