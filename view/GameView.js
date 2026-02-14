@@ -26,6 +26,7 @@ export class GameView {
     this.p2InputEl = document.getElementById('player2-name');
     this.p1LabelEl = document.getElementById('player1-label');
     this.p2LabelEl = document.getElementById('player2-label');
+    this.roundCounterEl = document.querySelector('.round-counter');
     this.startDialog = document.getElementById('start-dialog');
     this.gameOverDialog = document.getElementById('gameover-dialog');
     this.helpDialog = document.getElementById('help-dialog');
@@ -68,6 +69,10 @@ export class GameView {
   togglePlayerArrow() {
     this.leftArrowEl.classList.toggle('hidden');
     this.rightArrowEl.classList.toggle('hidden');
+  }
+
+  updateRoundCounter(round) {
+    this.roundCounterEl.textContent = `Round ${round}`;
   }
 
   handleVisibilityChange() {
@@ -146,6 +151,19 @@ export class GameView {
     this.onUsePower(powerEl?.id);
   }
 
+  // disabled by default on first round
+  disablePowers() {
+    this.powersEl.querySelectorAll('img').forEach((img) => {
+      img.classList.remove('active');
+    });
+  }
+
+  enablePowers() {
+    this.powersEl.querySelectorAll('img').forEach((img) => {
+      img.classList.add('active');
+    });
+  }
+
   updatePowersRow(powerId, isActive) {
     const powerEl = this.powersEl.querySelector(`#${powerId}`);
     if (powerEl) {
@@ -174,13 +192,12 @@ export class GameView {
 
     if (isNewGame) {
       document.querySelector('button').setAttribute('style', 'display: none');
-      this.powersEl.querySelectorAll('img').forEach((img) => {
-        img.classList.add('active');
-      });
+      this.disablePowers();
       this.gameOverDialog.close();
       this.winnerMarkerEl.className = 'winner-marker';
       this.leftArrowEl.classList.remove('hidden');
       this.rightArrowEl.classList.add('hidden');
+      this.roundCounterEl.textContent = 'Round 1';
     }
   }
 

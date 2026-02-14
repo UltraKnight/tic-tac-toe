@@ -33,6 +33,7 @@ export class GameState {
   }
 
   reset() {
+    this.currentRound = 1;
     this.board = new Array(3).fill(null).map(() => new Array(3).fill(null));
     this.currPlayer = this.players[Players.O];
     this.musics = {
@@ -124,7 +125,7 @@ export class GameState {
       return WIN_POSITIONS.MainDiagonal;
     }
 
-    return false;
+    return '';
   }
 
   checkWinConditionOnSecondaryDiagonal(player) {
@@ -132,7 +133,7 @@ export class GameState {
       return WIN_POSITIONS.SecondaryDiagonal;
     }
 
-    return false;
+    return '';
   }
 
   // the power up shuffle moves all symbols on the board
@@ -144,7 +145,7 @@ export class GameState {
     let hasWonOnCol = false;
     let winner = null;
     let result = false;
-    const nextPlayer = Object.values(this.players).filter((v) => v.symbol != this.currPlayer.symbol)[0];
+    const nextPlayer = Object.values(this.players).find((v) => v.symbol != this.currPlayer.symbol);
 
     const checkWinner = (player) => {
       hasWonOnMainDiagonal = this.checkWinConditionOnMainDiagonal(player);
@@ -217,7 +218,9 @@ export class GameState {
   }
 
   switchPlayer() {
-    this.currPlayer = this.currPlayer === this.players[Players.X] ? this.players[Players.O] : this.players[Players.X];
+    const isPlayer2 = this.currPlayer === this.players[Players.X];
+    isPlayer2 && this.currentRound++;
+    this.currPlayer = isPlayer2 ? this.players[Players.O] : this.players[Players.X];
   }
 
   updateScore(playerSymbol) {

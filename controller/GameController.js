@@ -31,13 +31,14 @@ export class GameController {
     const { isActive, affectedPositions, redraw, canHaveWinner } = this.state.usePower(powerId);
     if (isActive) {
       switch (powerId) {
-        case POWERS.bomb:
+        case POWERS.bomb: {
           const explosionSfx = this.state.getMusic('explosion');
           this.playAudio(explosionSfx);
           affectedPositions.forEach(({ row, col, replacer }) => {
             this.view.updateBoard(row, col, replacer, { className: 'explode', transitionalValue: '🔥' });
           });
           break;
+        }
         case POWERS.change:
           affectedPositions.forEach(({ row, col, replacer }) => {
             this.view.updateBoard(row, col, replacer, { className: 'animate', transitionalValue: replacer });
@@ -60,9 +61,11 @@ export class GameController {
           this.view.updateScore(winner.symbol, newScore);
         } else {
           this.handleSwitchPlayer();
+          this.view.updateRoundCounter(this.state.currentRound);
         }
       } else {
         this.handleSwitchPlayer();
+        this.view.updateRoundCounter(this.state.currentRound);
       }
     }
   }
@@ -87,6 +90,11 @@ export class GameController {
       this.handleGameOver();
     } else {
       this.handleSwitchPlayer();
+      this.view.updateRoundCounter(this.state.currentRound);
+    }
+
+    if (this.state.currentRound === 1 && this.state.currPlayer.symbol === 'X') {
+      this.view.enablePowers();
     }
   }
 
