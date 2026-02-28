@@ -16,7 +16,7 @@ html {
 body {
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   background-color: var(--bg);
-  height: 100dvh;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
   display: flex;
@@ -132,6 +132,9 @@ dialog {
 #board {
   position: relative;
   margin-bottom: 20px;
+  max-width: 100dvw;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 tbody,
@@ -144,8 +147,7 @@ td {
 table {
   font-family: 'Press Start 2P', monospace;
   border-collapse: collapse;
-  min-width: 320px;
-  min-height: 320px;
+  margin-inline: 10px;
 
   tbody {
     :hover {
