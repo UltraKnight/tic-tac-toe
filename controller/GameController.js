@@ -2,8 +2,8 @@ import { GameState, POWERS } from '../model/GameState.js';
 import { GameView } from '../view/GameView.js';
 
 export class GameController {
-  constructor() {
-    this.state = new GameState();
+  constructor(gridSize = 3) {
+    this.state = new GameState(gridSize);
     this.view = new GameView({
       onCellClick: this.handleMove.bind(this),
       onUsePower: this.handleUsePower.bind(this),
@@ -103,7 +103,7 @@ export class GameController {
     this.view.togglePlayerArrow();
   }
 
-  handleGameOver(winPosition) {
+  handleGameOver(winPosition = '') {
     const gameOverMusic = this.state.getMusic('gameOver');
     this.pauseAudio(this.state.getMusic('bg'));
     this.playAudio(gameOverMusic);
@@ -112,7 +112,7 @@ export class GameController {
   }
 
   startGame(clearScore = true) {
-    this.state.reset();
+    this.state.reset(this.state.board.length);
     this.view.render(this.state.getBoard(), true);
     this.view.bindEvents();
     if (clearScore) {

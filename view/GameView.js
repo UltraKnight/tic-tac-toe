@@ -72,7 +72,7 @@ export class GameView {
   }
 
   updateRoundCounter(round) {
-    this.roundCounterEl.textContent = `Round ${round}`;
+    this.roundCounterEl.textContent = `Turn ${round}`;
   }
 
   handleVisibilityChange() {
@@ -176,9 +176,14 @@ export class GameView {
   }
 
   render(board, isNewGame) {
+    this.boardEl.innerHTML = '';
     board.forEach((row, r) => {
+      const tr = document.createElement('tr');
       row.forEach((value, c) => {
-        const cell = this.boardEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+        tr.appendChild(document.createElement('td'));
+        const cell = tr.lastChild;
+        cell.dataset.row = r;
+        cell.dataset.col = c;
         cell.textContent = value ?? '';
         cell.className = '';
         if (value === Players.O || value === Players.X) {
@@ -188,6 +193,7 @@ export class GameView {
           });
         }
       });
+      this.boardEl.appendChild(tr);
     });
 
     if (isNewGame) {
@@ -197,7 +203,9 @@ export class GameView {
       this.winnerMarkerEl.className = 'winner-marker';
       this.leftArrowEl.classList.remove('hidden');
       this.rightArrowEl.classList.add('hidden');
-      this.roundCounterEl.textContent = 'Round 1';
+      this.roundCounterEl.textContent = 'Turn 1';
+      this.winnerMarkerEl.style.visibility = 'hidden';
+      this.winnerMarkerEl.removeAttribute('style');
     }
   }
 
@@ -241,9 +249,62 @@ export class GameView {
   }
 
   showGameOver(winner, winPosition) {
+    /**
+     *
+     * @param {string} position - the position of the board, the available values are:
+     * main-diagonal, secondary-diagonal, col-n, row-n
+     * @returns {Array} - an array containing the data-attribute name and value to find the starting cell for drawing the winner marker
+     */
+    const parseWinPosition = (position) => {
+      if (position.endsWith('diagonal')) {
+        // for the secondary diagonal, we will start drawing the winner marker from the top right corner (last column), so we need to get the last row index
+        return position === 'main-diagonal'
+          ? ['data-row', 0]
+          : ['data-row', this.boardEl.querySelectorAll('tr').length - 1];
+      } else {
+        const [type, index] = position.split('-');
+        return [`data-${type}`, index];
+      }
+    };
+
     const winnerEl = this.gameOverDialog.querySelector('.winner');
     winnerEl.textContent = this.getWinMessage(winner);
-    this.setWinnerMarkerClass(winPosition);
+    
+    if (winner) {
+      this.winnerMarkerEl.style.visibility = 'visible';
+      const [dataAttr, dataValue] = parseWinPosition(winPosition);
+      const startDrawingCell = this.boardEl.querySelector(`td[${dataAttr}="${dataValue}"]`);
+      const cellRect = startDrawingCell.getBoundingClientRect();
+      const boardRect = this.boardEl.getBoundingClientRect();
+
+      if (winPosition.startsWith('row')) {
+        // get middle left-middle point of the cell
+        const markerY = cellRect.top - boardRect.top + cellRect.height / 2;
+        this.winnerMarkerEl.style.transform = 'translateY(-50%)';
+        this.winnerMarkerEl.style.left = '0px';
+        this.winnerMarkerEl.style.top = `${markerY}px`;
+        this.winnerMarkerEl.style.width = `100%`;
+      } else if (winPosition.startsWith('col')) {
+        const markerX = cellRect.left - boardRect.left + cellRect.width / 2;
+        this.winnerMarkerEl.style.transform = 'translateX(-50%)';
+        this.winnerMarkerEl.style.left = `${markerX}px`;
+        this.winnerMarkerEl.style.top = '0px';
+        this.winnerMarkerEl.style.height = `100%`;
+      } else if (winPosition === 'main-diagonal') {
+        this.winnerMarkerEl.style.left = '0px';
+        this.winnerMarkerEl.style.top = '0px';
+        this.winnerMarkerEl.style.transformOrigin = 'top left';
+        this.winnerMarkerEl.style.transform = 'translateY(-50%) rotate(45deg)';
+        this.winnerMarkerEl.style.width = `${100 * Math.sqrt(2)}%`; // 100% * sqrt(2) to cover the diagonal of the square board
+      } else if (winPosition === 'secondary-diagonal') {
+        this.winnerMarkerEl.style.right = '0px';
+        this.winnerMarkerEl.style.top = '0px';
+        this.winnerMarkerEl.style.transformOrigin = 'top right';
+        this.winnerMarkerEl.style.transform = 'translateY(-50%) rotate(-45deg)';
+        this.winnerMarkerEl.style.width = `${100 * Math.sqrt(2)}%`;
+      }
+    }
+
     setTimeout(
       () => {
         this.gameAreaEl.classList.add('hidden');

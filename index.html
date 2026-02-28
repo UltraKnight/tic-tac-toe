@@ -26,8 +26,20 @@
 
     <script type="module">
       'serviceWorker' in navigator && navigator.serviceWorker.register('service-worker.js');
-      import './init.js';
+      import { initGame } from './init.js';
       import './installBtn.js';
+
+      const gameController = initGame();
+      const initGameWithNewSize = () => {
+        const size = Number.parseInt(prompt('Enter grid size (3 to 10):', '3'));
+        const newController = initGame(size);
+        gameController.state = newController.state;
+        gameController.view = newController.view;
+        document.querySelector('.game-area').classList.remove('hidden');
+        gameController.startGame();
+      };
+
+      document.getElementById('change-game-size-button').addEventListener('click', initGameWithNewSize);
     </script>
   </head>
   <body>
@@ -52,6 +64,7 @@
         <h2 class="current-score"></h2>
         <button id="play-again-button">Revenge</button>
         <button class="start-button">New Game</button>
+        <button id="change-game-size-button">Change Grid Size</button>
       </div>
     </dialog>
     <dialog id="help-dialog">
@@ -83,23 +96,7 @@
       </div>
       <div id="board">
         <table>
-          <tbody>
-            <tr>
-              <td data-row="0" data-col="0"></td>
-              <td data-row="0" data-col="1"></td>
-              <td data-row="0" data-col="2"></td>
-            </tr>
-            <tr>
-              <td data-row="1" data-col="0"></td>
-              <td data-row="1" data-col="1"></td>
-              <td data-row="1" data-col="2"></td>
-            </tr>
-            <tr>
-              <td data-row="2" data-col="0"></td>
-              <td data-row="2" data-col="1"></td>
-              <td data-row="2" data-col="2"></td>
-            </tr>
-          </tbody>
+          <tbody></tbody>
         </table>
         <div class="winner-marker"></div>
       </div>

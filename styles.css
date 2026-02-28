@@ -97,7 +97,7 @@ dialog {
         width: 30px;
         height: 30px;
       }
-    } 
+    }
   }
 }
 
@@ -133,6 +133,7 @@ dialog {
   width: fit-content;
   height: fit-content;
   position: relative;
+  margin-bottom: 20px;
 }
 
 tbody,
@@ -145,23 +146,20 @@ td {
 table {
   font-family: 'Press Start 2P', monospace;
   border-collapse: collapse;
-  margin-bottom: 20px;
-  width: 320px;
-  height: 320px;
+  min-width: 320px;
+  min-height: 320px;
 
   tbody {
     :hover {
       cursor: pointer;
     }
 
-    tr:nth-of-type(2) > td {
-      border-block: 8px solid var(--light-blue-border);
+    tr:not(:last-child) > td {
+      border-bottom: 8px solid var(--light-blue-border);
     }
 
-    tr {
-      :nth-child(2) {
-        border-inline: 8px solid var(--light-blue-border);
-      }
+    tr > td:not(:last-child) {
+      border-right: 8px solid var(--light-blue-border);
     }
 
     tr > td {
@@ -196,66 +194,14 @@ table {
 }
 
 .winner-marker {
+  visibility: hidden;
   position: absolute;
-  width: 10px;
-  height: 0;
+  width: 5px;
+  height: 5px;
   background-color: var(--success);
-  transform: translate(-50%);
-  transition: height 1s ease-out;
-  transform-origin: top;
-  top: -9999px;
-  left: -15px;
-
-  &.first-column {
-    height: 100%;
-    left: 50px;
-    top: -10px;
-  }
-
-  &.second-column {
-    height: 100%;
-    left: 50%;
-    top: -10px;
-  }
-
-  &.third-column {
-    height: 100%;
-    left: 270px;
-    top: -10px;
-  }
-
-  &.first-row {
-    height: 100%;
-    rotate: -90deg;
-    top: 45px;
-  }
-
-  &.second-row {
-    height: 100%;
-    rotate: -90deg;
-    top: calc(-10px + 50%);
-  }
-
-  &.third-row {
-    height: 100%;
-    left: calc(100% + 5px);
-    rotate: 90deg;
-    top: 275px;
-  }
-
-  &.main-diagonal {
-    rotate: -45deg;
-    height: 140%;
-    top: 0;
-  }
-
-  &.secondary-diagonal {
-    transform-origin: bottom;
-    bottom: 0;
-    top: unset;
-    rotate: 45deg;
-    height: 140%;
-  }
+  transition:
+    width 1s ease-out,
+    height 1s ease-out;
 }
 
 h1,
